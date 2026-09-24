@@ -27,27 +27,27 @@ jobs:
             
             # Clean up the file paths for the API URL
             rel_path="${filepath#./}"
-            filename=\((basename "\)rel_path")
-            dirname=\((dirname "\)rel_path")
-            
+            filename=$(basename "$rel_path")
+            dirname=$(dirname "$rel_path")
+
             # Construct the destination URL
             # ?createDirectories=true ensures FME Flow builds any missing subfolders
             if [ "$dirname" = "." ]; then
-              dest_url="\(FME_FLOW_URL/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/python/\)TARGET_FOLDER?createDirectories=true"
+              dest_url="${FME_FLOW_URL}/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/python/${TARGET_FOLDER}?createDirectories=true"
             else
-              dest_url="\(FME_FLOW_URL/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/python/\)TARGET_FOLDER/$dirname?createDirectories=true"
+              dest_url="${FME_FLOW_URL}/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/python/${TARGET_FOLDER}/$dirname?createDirectories=true"
             fi
-            
+
             echo "Uploading $rel_path..."
-            
+
             # Execute REST API POST request
-            status_code=\((curl -s -o /dev/null -w "%{http_code}" -X POST "\)dest_url" \
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$dest_url" \
               -H "Authorization: fmetoken token=$FME_FLOW_TOKEN" \
               -H "Content-Disposition: attachment; filename=\"$filename\"" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @"$filepath")
-              
-            if [ "\(status_code" -ge 200 ] && [ "\)status_code" -lt 300 ]; then
+
+            if [ "$status_code" -ge 200 ] && [ "$status_code" -lt 300 ]; then
               echo "✅ Success"
             else
               echo "❌ Failed (HTTP $status_code)"
