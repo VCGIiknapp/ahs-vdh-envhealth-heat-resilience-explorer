@@ -44,9 +44,9 @@ jobs:
             # Construct the destination URL
             # ?createDirectories=true ensures FME Flow builds any missing subfolders
             if [ "$dirname" = "." ]; then
-              dest_url="${FME_FLOW_URL}/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/python/${TARGET_FOLDER}?createDirectories=true"
+              dest_url="${FME_FLOW_URL}/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/Python/${TARGET_FOLDER}?createDirectories=true"
             else
-              dest_url="${FME_FLOW_URL}/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/python/${TARGET_FOLDER}/$dirname?createDirectories=true"
+              dest_url="${FME_FLOW_URL}/fmerest/v3/resources/connections/FME_SHAREDRESOURCE_ENGINE/filesys/Plugins/Python/${TARGET_FOLDER}/$dirname?createDirectories=true"
             fi
 
             echo "Uploading $rel_path..."
