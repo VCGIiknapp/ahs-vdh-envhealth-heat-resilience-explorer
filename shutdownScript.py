@@ -62,7 +62,7 @@ def uploadToAGO(target_path, gis):
                 msg_prefix = "PDF added"
             
             # Share publicly to ensure the URL is accessible
-            item.share(everyone=True)
+            item.sharing.sharing_level = "EVERYONE"
             
             # Construct the direct URL to the PDF data using the item ID
             base_url = gis.url.rstrip('/')
