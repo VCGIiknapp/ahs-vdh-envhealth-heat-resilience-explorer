@@ -1,11 +1,11 @@
 name: Deploy Python Scripts to FME Flow
 
-# Triggers the workflow on pushes to the main branch
+# Triggers the workflow on pushes to the master branch
 # but ONLY if a Python file was modified
 on:
   push:
     branches:
-      - main 
+      - master
     paths:
       - '**.py'
 
