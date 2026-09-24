@@ -2,13 +2,12 @@ import arcpy
 import os
 import fme
 
+def exportMapSeriesToPNG():
+    # 1. Fetch FME parameters inside the function
+    APRX_PATH = fme.macroValues['StartupScript_AprxPath']
+    OUTPUT_FOLDER = fme.macroValues['StartupScript_OutputFolder']
 
-# Define your paths (consider using FME macro values here using fme.macroValues[])
-APRX_PATH = fme.macroValues['StartupScript_AprxPath']
-OUTPUT_FOLDER = fme.macroValues['StartupScript_OutputFolder']
-
-
-def exportMapSeriesToPNG(APRX_PATH, OUTPUT_FOLDER):
+    # 2. Execute the ArcGIS Pro logic
     aprx = arcpy.mp.ArcGISProject(APRX_PATH)
     
     # Grab the layout containing the map series
@@ -29,5 +28,3 @@ def exportMapSeriesToPNG(APRX_PATH, OUTPUT_FOLDER):
             
             # Execute export
             ms.export(pngExFormat, msExOpt)
-            
-exportMapSeriesToPNG(APRX_PATH, OUTPUT_FOLDER)

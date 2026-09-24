@@ -6,15 +6,9 @@ from arcgis.gis import GIS
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ---------------------------------------------------------
-# 1. Configuration & Authentication
+# 1. Configuration Constants (Safe to keep global)
 # ---------------------------------------------------------
-# Authenticate with ArcGIS Online
 AGO_URL = "https://ahs-vt.maps.arcgis.com/"
-USERNAME = fme.macroValues['AGO_Username']
-PASSWORD = fme.macroValues['AHS_ProductionPassword']
-
-# Read directory where PDFs are saved to in the FME workspace
-PDF_FOLDER = fme.macroValues['ShutdownScriptPDF_Folder']
 AGO_FOLDER = "AHS_VDH_EnvHealth_HeatResilience"
 
 # ---------------------------------------------------------
@@ -129,9 +123,6 @@ def uploadToAGO(target_path, gis):
                 csv_item.update({}, csv_path)
                 logger.logMessageString("Shutdown Script: Updated existing CSV mapping item.", fmeobjects.FME_INFORM)
                 
-                # NOTE: Overwriting an already published Hosted Feature Layer programmatically 
-                # requires the arcgis.features.FeatureLayerCollection manager.
-                # If this is a recurring run, you may want to implement `.manager.overwrite(csv_path)` here.
             else:
                 csv_item_props = {
                     "title": os.path.splitext(csv_filename)[0],
@@ -147,14 +138,26 @@ def uploadToAGO(target_path, gis):
 
 
 # ---------------------------------------------------------
-# 4. Execution
+# 4. Main Controller Function
 # ---------------------------------------------------------
-try:
+def execute_shutdown_process(workspace_status):
     logger = fmeobjects.FMELogFile()
-    logger.logMessageString("Shutdown Script: Connecting to ArcGIS Online...", fmeobjects.FME_INFORM)
     
-    gis_connection = GIS(AGO_URL, USERNAME, PASSWORD)
-    uploadToAGO(PDF_FOLDER, gis_connection)
-    
-except Exception as e:
-    logger.logMessageString(f"Shutdown Script Fatal Error: {str(e)}", fmeobjects.FME_ERROR)
+    # Abort if the workspace failed to prevent uploading incomplete data
+    if not workspace_status:
+        logger.logMessageString("Shutdown Script: Translation failed. Skipping ArcGIS Online upload.", fmeobjects.FME_WARN)
+        return
+
+    try:
+        logger.logMessageString("Shutdown Script: Connecting to ArcGIS Online...", fmeobjects.FME_INFORM)
+        
+        # Fetch FME parameters inside the function
+        USERNAME = fme.macroValues['AGO_Username']
+        PASSWORD = fme.macroValues['AHS_ProductionPassword']
+        PDF_FOLDER = fme.macroValues['ShutdownScriptPDF_Folder']
+        
+        gis_connection = GIS(AGO_URL, USERNAME, PASSWORD)
+        uploadToAGO(PDF_FOLDER, gis_connection)
+        
+    except Exception as e:
+        logger.logMessageString(f"Shutdown Script Fatal Error: {str(e)}", fmeobjects.FME_ERROR)
