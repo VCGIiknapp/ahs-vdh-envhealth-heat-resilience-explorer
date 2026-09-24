@@ -22,6 +22,17 @@ jobs:
           FME_FLOW_TOKEN: ${{ secrets.FME_FLOW_TOKEN }}
           TARGET_FOLDER: "ahs_vdh_envhealth_heat_resilience_explorer"
         run: |
+          # Secrets can pick up trailing newlines/whitespace when pasted into the
+          # GitHub UI, which breaks curl's URL parser (exit code 3). Strip that out
+          # and fail with a clear message instead of a bare exit code.
+          FME_FLOW_URL="$(printf '%s' "$FME_FLOW_URL" | tr -d '[:space:]')"
+          FME_FLOW_TOKEN="$(printf '%s' "$FME_FLOW_TOKEN" | tr -d '[:space:]')"
+
+          if [[ ! "$FME_FLOW_URL" =~ ^https?:// ]]; then
+            echo "::error::FME_FLOW_URL secret is empty or malformed (must start with http:// or https://)"
+            exit 1
+          fi
+
           # Find all Python files in the repository
           find . -name "*.py" -type f | while read -r filepath; do
             
@@ -41,7 +52,7 @@ jobs:
             echo "Uploading $rel_path..."
 
             # Execute REST API POST request
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$dest_url" \
+            status_code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST "$dest_url" \
               -H "Authorization: fmetoken token=$FME_FLOW_TOKEN" \
               -H "Content-Disposition: attachment; filename=\"$filename\"" \
               -H "Content-Type: application/octet-stream" \
